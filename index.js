@@ -17,19 +17,33 @@ app.post("/",function(req,res){
   //https://apiv2.bitcoinaverage.com/indices/global/ticker/BTCUSD
   var crypto=req.body.crypto;
   var fiat=req.body.fiat;
-  var baseURL="https://apiv2.bitcoinaverage.com/indices/global/ticker/";
-  var finalURL=baseURL+crypto+fiat;
-  request(finalURL,function(error,response,body){
+  var amount=req.body.amount;
+
+  //parameter가지고 API call을 할 때, 쉽게 하는 법은 request에 옵션 값을 넣어서하는 것. 문서에 나와있음
+  var options={
+    url:"https://apiv2.bitcoinaverage.com/convert/global",
+    method:"GET",
+    qs:{
+      from: crypto,
+      to: fiat,
+      amount:amount
+    }
+  };
+
+
+
+  request(options,function(error,response,body){
     // console.log(response);
     // console.log(response.statusCode);
     // console.log(body);
 
     var data = JSON.parse(body);
-    var price = data.last;//가격을 알려줄 것임
-    var currentDate = data.display_timestamp;
+    //request 방식이 달라져서 json가져오는 방식도 다 밑에처럼 다름
+    var price = data.price;
+    var currentDate = data.time;
     //res.send는 하나밖에 못보냄, 여러개 보내려먼 res.write써줘야 함
     res.write("<p>The current date is "+currentDate+"</p>");
-    res.write("<h1>The price of "+crypto+" is "+price+fiat+"</h1>");
+    res.write("<h1>The price of "+amount+crypto+" is currently worth "+price+fiat+"</h1>");
     res.send();
   });
 });
